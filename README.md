@@ -38,7 +38,7 @@ Users will have access to a directory that consists of all campus elevators and 
 Campus Facilities Manager will have a user-friendly interface that will make campus mobility information easy to understand. 
 Because our group name is lamb, we are incorporated sheep and farm-themed into our interface. As mentioned before, sheep may be used to represent elevator occupants, while other farm-inspired elements may be incorporated into the campus map and interface.
 
-# 6. Potential Technoligy Stack
+# 6. Potential Technology Stack
 - Frontend: React, HTML, CSS, JavaScript
 - Backend: Python / FastAPI
 - Database: Supabase / PostgreSQL
