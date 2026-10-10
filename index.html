@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js"></script>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="side">
+            
+            <div class="map-container"> 
+                <!-- Map background image -->
+                <img src="images/CCNYMap.png" alt ="CCNY Map">
+            
+                <!-- feature is capacity tracker, change name later-->
+                <div class="building building-n" onclick="showFeature('NAC')">
+                    <!-- NAC-->
+                    <img src="images/barn1.png">
+                </div>
+
+                <div class="building building-s" onclick="showFeature('Shepard')">
+                    <!-- Shepard-->
+                    <img src="images/barn3.png">
+                </div>
+
+                <div class="building building-m" onclick="showFeature('Marshak')">
+                    <!-- Marshak -->
+                    <img src="images/barn2.png">
+                </div>
+
+            </div> <!---map-container-->
+
+        </div> <!---side (left- map)-->
+
+        <div class="side">
+
+            <div class="title title-s"> 
+                Shepard Hall
+            </div>
+
+            <div class="title title-m"> 
+                Marshak Science Building
+            </div>
+
+            <div class="title title-n"> 
+                North Academic Center
+            </div>
+            
+        </div> <!---side (right - titles)-->
+
+    </div> <!--container-->
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+body{
+    background-color: #87B37A;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+    /* feel free to change font whenever
+    note: crop out 1-15 focus on specific buildings - 
+    overlay this on top of purple*/
+}
+
+.container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    /* makes text bigger when hovering over building*/
+    &:has(.building-m:hover) .title-m,
+    &:has(.building-n:hover) .title-n,
+    &:has(.building-s:hover) .title-s {
+    transform: scale(1.6) translate(18%);
+    color: white;
+    }
+}
+
+.side {
+    flex: 1;
+}
+
+.map-container img{
+    position: absolute;
+    /* centering that is kind of not worth it 
+    left: 50%;
+    transform: translate(-50%, 0%);
+    since hover needs to translate too
+    transform: translate(-50%, 0%) scale(1.05);
+    */
+    width: 100%;
+    height: auto;
+}
+
+.building {
+    position: relative;
+    display: block;
+}
+
+.building img {
+    height: auto;
+    display: block;
+}
+
+.building-n {
+    top: 42vw;  
+    left: 12%;
+    width: 35%;
+}
+
+.building-s {
+    top: 20vw;  
+    left: 50%;
+    width: 25%;
+}
+
+.building-m {
+    top: 38vw;  
+    left: 46%;
+    width: 30%;
+}
+
+.building:hover img {
+    transform: scale(1.05);
+}
+
+.title {
+    color: #e5ecf4;
+    font-size: 1.5vw;
+    position: relative;
+    display: block;
+    left: 14%;
+}
+
+.title-n {
+    top: 47.4vw;  
+}
+
+.title-s {
+    top: 23.5vw;  
+}
+
+.title-m {
+    top: 45.2vw;  
+}
