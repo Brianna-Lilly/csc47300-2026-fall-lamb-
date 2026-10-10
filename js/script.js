@@ -1,22 +1,31 @@
-//placeholder data
+//placeholder data - turn all js into typescript later
 const buildingData = {
     NAC: {
-      title: "NAC",
+      title: "North Academic Center",
+      description: "Information about the NAC"
     },
     Shepard: {
-      title: "Shepard",
+      title: "Shepard Hall",
+      description: "Information about Shepard Hall"
     },
     Marshak: {
-      title: "Marshak",
+      title: "Marshak Science Building",
+      description: "Information about Marshak"
     }
   };
 
+//rename eventually?
 function showFeature(buildingID) {
-    // capacity/occupancy? rename function
-    // replace later with real code - this is a test
+  const view = document.getElementById("feature-view");
+  const title = document.getElementById("feature-title");
+  const description = document.getElementById("feature-description");
 
-    const data = buildingData[buildingID];
+  title.textContent = buildingData[buildingID].title;
+  description.textContent = buildingData[buildingID].description;
 
-    alert(`feature coming soon: ${data.title}`);
-    console.log("feature activated");
+  view.style.display = "flex";
+}
+
+function closeFeature() {
+  document.getElementById("feature-view").style.display = "none";
 }

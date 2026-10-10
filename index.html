@@ -18,11 +18,7 @@
                 <img src="images/CCNYMap.png" alt ="CCNY Map">
             
                 <!-- feature is capacity tracker, change name later-->
-                <div class="building building-n" onclick="showFeature('NAC')">
-                    <!-- NAC-->
-                    <img src="images/barn1.png">
-                </div>
-
+                <!--perhaps replace onclick when adding more buildings...-->
                 <div class="building building-s" onclick="showFeature('Shepard')">
                     <!-- Shepard-->
                     <img src="images/barn3.png">
@@ -33,25 +29,40 @@
                     <img src="images/barn2.png">
                 </div>
 
+                <div class="building building-n" onclick="showFeature('NAC')">
+                    <!-- NAC-->
+                    <img src="images/barn1.png">
+                </div>
+
             </div> <!---map-container-->
 
         </div> <!---side (left- map)-->
 
         <div class="side">
 
-            <div class="title title-s"> 
+            <div class="title title-s" onclick="showFeature('Shepard')"> 
                 Shepard Hall
             </div>
 
-            <div class="title title-m"> 
+            <div class="title title-m" onclick="showFeature('Marshak')"> 
                 Marshak Science Building
             </div>
 
-            <div class="title title-n"> 
+            <div class="title title-n" onclick="showFeature('NAC')"> 
                 North Academic Center
             </div>
             
         </div> <!---side (right - titles)-->
+
+        <!-- building information overlay test -->
+        <div id="feature-view" class="feature-view">
+            <div class="feature-content">
+                <button class="close-button" onclick="closeFeature()"></button>
+                <!--placeholder info?-->
+                <h2 id="feature-title">building name here</h2>
+                <p id="feature-description"> description here</p>
+            </div>
+        </div>
 
     </div> <!--container-->
 

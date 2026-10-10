@@ -91,3 +91,36 @@ body{
 .title-m {
     top: 45.2vw;  
 }
+
+/*hidden overlay - after clicking building*/
+.feature-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+
+.feature-content {
+    /*feel free to change any/all dimensions/colors here*/
+    background: #e5ecf4;
+    width: 75%;
+    height: 75%;
+    padding: 3%;
+    border-radius: 12px;
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    position: relative;
+    /*should the button be on the left or right?*/
+    margin-left: auto;
+    display: flex;
+    height: 4%;
+    aspect-ratio: 1 / 1;  
+    border-radius: 50%;
+    background: #ef767a;
+    border: #ef767a;
+}
