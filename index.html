@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>home</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/script.js"></script>
+    <script src="js/script.js" defer> </script>
 </head>
 <body>
 
@@ -65,5 +65,53 @@
         </div>
 
     </div> <!--container-->
+
+<!-- Report Status popup -->
+<div id="report-modal" class="report-modal" style="display: none;">
+    <div class="report-modal-content">
+        <button type="button" class="close-button"
+                onclick="closeReportForm()"></button>
+
+        <h2>Report Status</h2>
+
+        <form id="report-form">
+            <label for="report-building">Building Name</label>
+            <input id="report-building" type="text" readonly>
+
+            <label for="report-equipment">Elevator / Escalator</label>
+            <select id="report-equipment" required></select>
+
+            <label for="report-email">Your Email</label>
+            <input id="report-email" type="email"
+                   placeholder="Enter your email" required>
+
+            <label for="report-crowding">Crowding Level</label>
+            <select id="report-crowding" required>
+                <option value="unknown">Not sure</option>
+                <option value="low">🐑 Low Traffic</option>
+                <option value="moderate">🐑🐑🐑 Moderate Traffic</option>
+                <option value="heavy">🐑🐑🐑🐑🐑 Heavy Traffic</option>
+            </select>
+
+            <label for="report-working">Is it working?</label>
+            <select id="report-working" required>
+                <option value="yes">Yes — Working</option>
+                <option value="no">No — Not Working</option>
+            </select>
+
+            <label for="report-details">Additional Details (optional)</label>
+            <textarea id="report-details"
+                      rows="3"
+                      placeholder="Describe the issue..."></textarea>
+
+            <button type="submit" class="report-submit">
+                Submit Report
+            </button>
+
+            <p id="report-message" role="status"></p>
+        </form>
+    </div>
+</div>
 </body>
 </html>
+

@@ -329,3 +329,93 @@ it will look like elevator buttons. (Stylistic choice)*/
 .nac-gap-small {
     margin-bottom: 24px;
 }
+
+#report-message {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#feature-description {
+  position: relative;
+}
+
+/* Report Status popup */
+.report-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;              /* JS switches this to flex */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;              /* must be higher than .feature-view (1000) */
+}
+
+.report-modal-content {
+    position: relative;
+    background: #e5ecf4;
+    padding: 40px 30px 30px 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.report-modal-content label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.report-modal-content input,
+.report-modal-content select,
+.report-modal-content textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.report-submit {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
+    background: #477b45;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.report-submit:hover {
+    background: #355b35;
+}
+
+.report-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+#open-report-button {
+  display: block;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #477b45;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#open-report-button:hover {
+  background: #355b35;
+}

@@ -77,7 +77,12 @@ function showFeature(buildingID) {
   buildingData[buildingID].floors.forEach(floor => {
     htmlContent += `<button class="elevator-btn" onclick="selectFloor(${floor})">${floor}</button>`;
   });
-  htmlContent += `</div>`;
+  htmlContent += `
+    </div>
+    <button id="open-report-button" type="button">
+    Report Status
+    </button>
+  `;
   
   description.innerHTML = htmlContent;
   view.style.display = "flex";
@@ -242,6 +247,15 @@ function selectFloor(floorNum) {
   `;
 
   description.innerHTML = htmlContent;
+
+  refreshEquipmentCards(description);
+
+description.insertAdjacentHTML("beforeend", `
+  <button id="open-report-button"
+          type="button"
+    Report Status
+  </button>
+`);
 }
 
 function selectEquipmentType(type) {
@@ -298,28 +312,73 @@ function selectSpecificEquipment(itemName) {
   `;
 }
 
-function selectDirection(direction) {
-  selectedDirection = direction;
-  const description = document.getElementById("feature-description");
 
-  //Status & crowdedness
-  description.innerHTML = `
-    <h3>Equipment Status</h3>
-    <p><strong>Building:</strong> ${buildingData[currentBuilding].title}</p>
-    <p><strong>Floor:</strong> ${selectedFloor}</p>
-    <p><strong>Unit:</strong> ${selectedEquipmentName} (${selectedDirection.toUpperCase()})</p>
-    <p><strong>Status:</strong> <span style="color: green;">In Service</span></p>
-    <p><strong>Crowdedness:</strong> Heavy (5 lambs)</p>
-    <div>
-      <img src="images/sheep1.png" alt="Lamb" width="30">
-      <img src="images/sheep1.png" alt="Lamb" width="30">
-      <img src="images/sheep1.png" alt="Lamb" width="30">
-      <img src="images/sheep1.png" alt="Lamb" width="30">
-      <img src="images/sheep1.png" alt="Lamb" width="30">
-    </div>
-    <br>
-    <button onclick="showFeature('${currentBuilding}')">Check Another</button>
-  `;
+function selectDirection(direction) {
+    selectedDirection = direction;
+    const description = document.getElementById("feature-description");
+
+    // Get the current status for this equipment across all floors.
+    const key = getEquipmentKey(
+        currentBuilding,
+        selectedFloor,
+        selectedEquipmentName
+    );
+
+    const status = calculateEquipmentStatus(key);
+
+    const crowdingLabels = {
+        unknown: "Crowding Unknown",
+        low: "🐑 Low Traffic",
+        moderate: "🐑🐑🐑 Moderate",
+        heavy: "🐑🐑🐑🐑🐑 Heavy"
+    };
+
+    const workingText = status.working === "no"
+        ? "Out of Service"
+        : "In Service";
+
+    const workingColor = status.working === "no"
+        ? "#991b1b"
+        : "green";
+
+    const crowdingText =
+        crowdingLabels[status.crowding] || crowdingLabels.unknown;
+
+    // Show sheep images only when a crowding level is reported.
+    const sheepCounts = {
+        low: 1,
+        moderate: 3,
+        heavy: 5
+    };
+
+    const sheepCount = sheepCounts[status.crowding] || 0;
+
+    let sheepImages = "";
+
+    for (let i = 0; i < sheepCount; i++) {
+        sheepImages +=
+            '<img src="images/sheep1.png" alt="Lamb" width="30">';
+    }
+
+    description.innerHTML = `
+        <h3>Equipment Status</h3>
+        <p><strong>Building:</strong>
+            ${buildingData[currentBuilding].title}
+        </p>
+        <p><strong>Floor:</strong> ${selectedFloor}</p>
+        <p><strong>Unit:</strong>
+            ${selectedEquipmentName} (${selectedDirection.toUpperCase()})
+        </p>
+        <p><strong>Status:</strong>
+            <span style="color: ${workingColor};">${workingText}</span>
+        </p>
+        <p><strong>Crowding:</strong> ${crowdingText}</p>
+        <div>${sheepImages}</div>
+        <br>
+        <button onclick="showFeature('${currentBuilding}')">
+            Check Another
+        </button>
+    `;
 }
 
 function closeFeature() {
@@ -335,3 +394,303 @@ function closeFeature() {
   selectedEquipmentName = null;
   selectedDirection = null;
 }
+
+
+/* =========================================
+   OCCUPANCY & EQUIPMENT STATUS REPORTING
+   ========================================= */
+
+const REPORTS_KEY = "campusEquipmentReports";
+const STATUS_KEY = "campusEquipmentStatus";
+
+let reportTarget = null;
+
+function getReports() {
+    return JSON.parse(localStorage.getItem(REPORTS_KEY) || "[]");
+}
+
+function saveReports(reports) {
+    localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
+}
+
+function getEquipmentStatus() {
+    return JSON.parse(localStorage.getItem(STATUS_KEY) || "{}");
+}
+
+function saveEquipmentStatus(statuses) {
+    localStorage.setItem(STATUS_KEY, JSON.stringify(statuses));
+}
+
+function getEquipmentKey(buildingID, floor, equipment) {
+    return `${buildingID}|${floor}|${equipment}`;
+}
+
+function getAllEquipmentForBuilding(buildingID) {
+    const building = buildingData[buildingID];
+    const names = new Set();
+
+    Object.values(building.equipment).forEach(floorData => {
+        Object.values(floorData).forEach(value => {
+            if (Array.isArray(value)) {
+                value.forEach(name => names.add(name));
+            }
+        });
+    });
+
+    return [...names];
+}
+
+function openBuildingReportForm() {
+    if (!currentBuilding) {
+        alert("Please select a building first.");
+        return;
+    }
+
+    reportTarget = {
+        buildingID: currentBuilding,
+        floor: selectedFloor,
+        equipment: ""
+    };
+
+    const modal = document.getElementById("report-modal");
+    const buildingInput = document.getElementById("report-building");
+    const equipmentSelect = document.getElementById("report-equipment");
+
+    buildingInput.value = buildingData[currentBuilding].title;
+    equipmentSelect.replaceChildren();
+
+    getAllEquipmentForBuilding(currentBuilding).forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        equipmentSelect.appendChild(option);
+    });
+
+    document.getElementById("report-form").reset();
+
+    buildingInput.value = buildingData[currentBuilding].title;
+    document.getElementById("report-message").textContent = "";
+
+    modal.style.display = "flex";
+}
+
+function closeReportForm() {
+    document.getElementById("report-modal").style.display = "none";
+    reportTarget = null;
+}
+
+/* Use current reports to calculate the public status.
+   A confirmed status expires 24 hours after confirmation.
+   Crowding reports expire after 30 minutes. */
+function calculateEquipmentStatus(key) {
+    const now = Date.now();
+    const statuses = getEquipmentStatus();
+    const reports = getReports().filter(report => report.key === key);
+
+    let working = statuses[key];
+
+    if (!working || now - working.confirmedAt >= 24 * 60 * 60 * 1000) {
+        working = {
+            working: "yes",
+            confirmedAt: 0
+        };
+        statuses[key] = working;
+        saveEquipmentStatus(statuses);
+    }
+
+    const recentCrowding = reports.filter(report =>
+        report.crowding !== "unknown" &&
+        now - report.timestamp < 30 * 60 * 1000
+    );
+
+    let crowding = "unknown";
+
+    if (recentCrowding.length > 0) {
+        const counts = {};
+
+        recentCrowding.forEach(report => {
+            counts[report.crowding] = (counts[report.crowding] || 0) + 1;
+        });
+
+        const highestCount = Math.max(...Object.values(counts));
+        const tiedLevels = Object.keys(counts).filter(
+            level => counts[level] === highestCount
+        );
+
+        const latest = recentCrowding
+            .filter(report => tiedLevels.includes(report.crowding))
+            .sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        crowding = latest.crowding;
+    }
+
+    return {
+        working: working.working,
+        crowding: crowding
+    };
+}
+
+/* Update visible cards without changing their layout. */
+function refreshEquipmentCards(container) {
+    container.querySelectorAll(".map-node").forEach(card => {
+        const nameElement = card.querySelector("span");
+        if (!nameElement) return;
+
+        const equipmentName = nameElement.textContent.trim();
+        const key = getEquipmentKey(
+            currentBuilding,
+            selectedFloor,
+            equipmentName
+        );
+
+        const status = calculateEquipmentStatus(key);
+        let badge = card.querySelector(".status-badge");
+
+        if (!badge) {
+            badge = document.createElement("span");
+            badge.className = "status-badge";
+            card.appendChild(badge);
+        }
+
+        if (status.working === "no") {
+            badge.className = "status-badge";
+            badge.style.background = "#fecaca";
+            badge.style.color = "#991b1b";
+            badge.textContent = "Out of Service";
+        } else {
+            const labels = {
+                unknown: "Crowding Unknown",
+                low: "🐑 Low Traffic",
+                moderate: "🐑🐑🐑 Moderate",
+                heavy: "🐑🐑🐑🐑🐑 Heavy"
+            };
+
+            badge.className = "status-badge " +
+                (status.crowding === "heavy" ? "busy" : "normal");
+
+            badge.style.background = "";
+            badge.style.color = "";
+            badge.textContent = labels[status.crowding] || labels.unknown;
+        }
+    });
+}
+
+/* Handle form submission. */
+document.getElementById("report-form").addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (!reportTarget) return;
+
+    const email = document.getElementById("report-email")
+        .value.trim().toLowerCase();
+
+    const equipment = document.getElementById("report-equipment").value;
+    const crowding = document.getElementById("report-crowding").value;
+    const working = document.getElementById("report-working").value;
+    const details = document.getElementById("report-details").value.trim();
+
+    if (!email || !email.includes("@")) {
+        document.getElementById("report-message").textContent =
+            "Please enter a valid email address.";
+        return;
+    }
+
+    const key = getEquipmentKey(
+        reportTarget.buildingID,
+        reportTarget.floor,
+        equipment
+    );
+
+    const now = Date.now();
+    let reports = getReports();
+
+    // Keep only reports from the last 24 hours.
+    reports = reports.filter(report =>
+        now - report.timestamp < 24 * 60 * 60 * 1000
+    );
+
+    // Do not allow the same email to submit another report
+    // for the same equipment within five minutes.
+    const duplicate = reports.some(report =>
+        report.key === key &&
+        report.email === email &&
+        now - report.timestamp < 5 * 60 * 1000
+    );
+
+    if (duplicate) {
+        document.getElementById("report-message").textContent =
+            "You already submitted a report for this equipment recently.";
+        return;
+    }
+
+    reports.push({
+        key,
+        email,
+        crowding,
+        working,
+        details,
+        timestamp: now
+    });
+
+    saveReports(reports);
+
+    
+    const matchingReports = reports.filter(report =>
+        report.key === key &&
+        report.working === working &&
+        now - report.timestamp < 24 * 60 * 60 * 1000
+    );
+
+    const distinctEmails = new Set(
+        matchingReports.map(report => report.email)
+    );
+
+    if (distinctEmails.size >= 2) {
+        const statuses = getEquipmentStatus();
+
+        statuses[key] = {
+            working: working,
+            confirmedAt: now
+        };
+
+        saveEquipmentStatus(statuses);
+
+        document.getElementById("report-message").textContent =
+            working === "no"
+                ? "Two reports received. Equipment marked Out of Service."
+                : "Two reports received. Equipment marked Working.";
+    } else {
+        document.getElementById("report-message").textContent =
+            "Thank you so much for your Report!";
+    }
+
+    if (currentBuilding && selectedFloor !== null) {
+        selectFloor(selectedFloor);
+    }
+
+    // Keep the success message visible briefly before closing.
+    const message = document.getElementById("report-message");
+    const result = message.textContent;
+
+    message.textContent = result;
+    document.getElementById("report-form").querySelector(
+        ".report-submit"
+    ).disabled = true;
+
+    setTimeout(() => {
+        closeReportForm();
+        document.getElementById("report-form").querySelector(
+            ".report-submit"
+        ).disabled = false;
+    }, 1800);
+});
+
+// Connect the Report Status button to the popup.
+document.addEventListener("click", function (event) {
+    const button = event.target.closest("#open-report-button");
+
+    if (!button) return;
+
+    event.preventDefault();
+    openBuildingReportForm();
+});
