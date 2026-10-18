@@ -21,9 +21,10 @@ const buildingData = {
         backElevators: ["Back Elevator 1", "Back Elevator 2"]
       },
       // Floor 8 cannot have an up escalator (top floor)
+      //No escalator on 8th floor
       8: {
         frontElevators: ["Front Elevator 1", "Front Elevator 2"],
-        escalators: ["Escalator Down"],
+        escalators: [],
         middleElevators: ["Middle Elevator 1", "Middle Elevator 2", "Middle Elevator 3", "Middle Elevator 4"],
         backElevators: ["Back Elevator 1", "Back Elevator 2"]
       }
@@ -396,9 +397,7 @@ function closeFeature() {
 }
 
 
-/* =========================================
-   OCCUPANCY & EQUIPMENT STATUS REPORTING
-   ========================================= */
+//Occupancy and Equipment Status
 
 const REPORTS_KEY = "campusEquipmentReports";
 const STATUS_KEY = "campusEquipmentStatus";
@@ -479,9 +478,9 @@ function closeReportForm() {
     reportTarget = null;
 }
 
-/* Use current reports to calculate the public status.
-   A confirmed status expires 24 hours after confirmation.
-   Crowding reports expire after 30 minutes. */
+//Use current reports to calculate the public status.
+//A confirmed status expires 24 hours after confirmation.
+//Crowding reports expire after 30 minutes. 
 function calculateEquipmentStatus(key) {
     const now = Date.now();
     const statuses = getEquipmentStatus();
@@ -530,7 +529,7 @@ function calculateEquipmentStatus(key) {
     };
 }
 
-/* Update visible cards without changing their layout. */
+//Update visible cards without changing their layout. 
 function refreshEquipmentCards(container) {
     container.querySelectorAll(".map-node").forEach(card => {
         const nameElement = card.querySelector("span");
@@ -575,7 +574,7 @@ function refreshEquipmentCards(container) {
     });
 }
 
-/* Handle form submission. */
+//Handle form submission. 
 document.getElementById("report-form").addEventListener("submit", event => {
     event.preventDefault();
 
@@ -694,3 +693,68 @@ document.addEventListener("click", function (event) {
     event.preventDefault();
     openBuildingReportForm();
 });
+
+//Campus directory code
+
+function openDirectoryModal() {
+    const modal = document.getElementById("directory-modal");
+    const container = document.getElementById("directory-list-container");
+    container.replaceChildren();
+
+    let htmlContent = "";
+
+    //Gets info from buildingData
+    Object.keys(buildingData).forEach(buildingID => {
+        const building = buildingData[buildingID];
+        
+        building.floors.forEach(floorNum => {
+            //Floor equipment data (goes to default if needed)
+            let eqData = building.equipment[floorNum] || building.equipment.default;
+            
+            //Gets all equipment arrays for this floor
+            let allEquipmentOnFloor = [
+                ...(eqData.frontElevators || []),
+                ...(eqData.middleElevators || []),
+                ...(eqData.backElevators || []),
+                ...(eqData.escalators || [])
+            ];
+
+            allEquipmentOnFloor.forEach(equipmentName => {
+                const key = getEquipmentKey(buildingID, floorNum, equipmentName);
+                const status = calculateEquipmentStatus(key);
+
+                const workingText = status.working === "no" ? "Out of Service" : "In Service";
+                const workingColor = status.working === "no" ? "#991b1b" : "#16a34a";
+
+                const crowdingLabels = {
+                    unknown: "Crowding Unknown",
+                    low: "🐑 Low Traffic",
+                    moderate: "🐑🐑🐑 Moderate",
+                    heavy: "🐑🐑🐑🐑🐑 Heavy"
+                };
+                const crowdingText = crowdingLabels[status.crowding] || crowdingLabels.unknown;
+
+                htmlContent += `
+                    <div class="directory-item-card">
+                        <div class="directory-item-info">
+                            <span class="directory-building-title">${building.title} (Floor ${floorNum})</span>
+                            <span class="directory-equipment-name"><strong>${equipmentName}</strong></span>
+                        </div>
+                        <div style="text-align: right; display: flex; flex-direction: column; gap: 4px;">
+                            <span style="font-weight: bold; color: ${workingColor}; font-size: 0.85rem;">${workingText}</span>
+                            <span class="status-badge ${status.crowding === 'heavy' ? 'busy' : 'normal'}" style="font-size: 0.75rem;">${crowdingText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    });
+
+    container.innerHTML = htmlContent;
+    modal.style.display = "flex";
+}
+
+function closeDirectoryModal() {
+    document.getElementById("directory-modal").style.display = "none";
+}
+

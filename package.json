@@ -1,0 +1,24 @@
+{
+  "name": "csc47300-2026-fall-lamb-",
+  "version": "1.0.0",
+  "description": "Campus Facilities Manager is a web application created to keep CCNY students, faculty, and staff members in the loop by providing them with information regarding escalator and elevator service \r in one place. With Campus Facilities Manager, CCNY community members can view the current status of campus elevators and escalators, see how crowded an elevator is, and provide service updates.\r This is important because it is not only convenient for staff and students to know if the elevator and escalators are working, but this information is crucial for members of the community who rely on the escalators \r and elevators for accessibility reasons. Our goal is to use Campus Facilities Manager to make CCNY more convenient and accessible.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Brianna-Lilly/csc47300-2026-fall-lamb-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Brianna-Lilly/csc47300-2026-fall-lamb-/issues"
+  },
+  "homepage": "https://github.com/Brianna-Lilly/csc47300-2026-fall-lamb-#readme",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

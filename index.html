@@ -112,6 +112,23 @@
         </form>
     </div>
 </div>
+
+</div> 
+
+    <!-- Directory Button -->
+    <button>
+    <img src="images/directory button.webp" alt="Directory" class="floating-directory-btn" onClick="openDirectoryModal()">
+    </button>
+
+    <div id="directory-modal" class="report-modal" style="display: none;">
+        <div class="report-modal-content directory-content-box">
+            <button type="button" class="close-button" onclick="closeDirectoryModal()"></button>
+            <h2>Campus Equipment Directory</h2>
+            <p style="font-size: 0.9rem; color: #555;">Live status and crowding for all elevators and escalators on campus.</p>
+            <div id="directory-list-container" style="margin-top: 15px;">
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

@@ -419,3 +419,27 @@ it will look like elevator buttons. (Stylistic choice)*/
 #open-report-button:hover {
   background: #355b35;
 }
+
+/*Directory Button*/
+.floating-directory-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px; 
+    width: 55px;
+    height: 55px;
+    cursor: pointer;
+    z-index: 1500;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.floating-directory-btn:hover {
+    transform: scale(1.1); 
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+}
+
+.floating-directory-btn img {
+    width: 100px; 
+    height: 100px;
+    object-fit: contain;
+}
