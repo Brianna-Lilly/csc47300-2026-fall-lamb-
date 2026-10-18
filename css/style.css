@@ -420,26 +420,31 @@ it will look like elevator buttons. (Stylistic choice)*/
   background: #355b35;
 }
 
-/*Directory Button*/
-.floating-directory-btn {
+.directory-btn-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px; 
-    width: 55px;
-    height: 55px;
+    bottom: 25px;
+    right: 100px;
+    z-index: 1000;
+}
+
+.floating-directory-btn {
+    background-color: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 30px;
+    padding: 10px 20px;
     cursor: pointer;
-    z-index: 1500;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    transition: transform 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .floating-directory-btn:hover {
-    transform: scale(1.1); 
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
-}
-
-.floating-directory-btn img {
-    width: 100px; 
-    height: 100px;
-    object-fit: contain;
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
