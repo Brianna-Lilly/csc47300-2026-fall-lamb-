@@ -243,7 +243,7 @@ function selectFloor(floorNum) {
     refreshEquipmentCards(description);
     description.insertAdjacentHTML("beforeend", `
   <button id="open-report-button"
-        type="button"
+        type="button">
     Report Status
   </button>
 `);
@@ -383,60 +383,65 @@ function getEquipmentStatus() {
 function saveEquipmentStatus(statuses) {
     localStorage.setItem(STATUS_KEY, JSON.stringify(statuses));
 }
-function getEquipmentKey(buildingID, floor, equipment) {
-    return `${buildingID}|${floor}|${equipment}`;
+function isEscalator(name) {
+    return name.toLowerCase().includes("escalator");
 }
-function getAllEquipmentForBuilding(buildingID) {
+function getEquipmentKey(buildingID, floor, equipment) {
+    if (isEscalator(equipment)) {
+        return `${buildingID}|${floor}|${equipment}`;
+    }
+    return `${buildingID}|${equipment}`;
+}
+function populateReportEquipment(buildingID, floor) {
+    const equipmentSelect = document.getElementById("report-equipment");
+    if (!equipmentSelect)
+        return;
     const building = buildingData[buildingID];
-    const names = new Set();
-    Object.values(building.equipment).forEach((floorData) => {
-        Object.values(floorData).forEach((value) => {
-            if (Array.isArray(value)) {
-                value.forEach((name) => names.add(name));
-            }
-        });
+    const eqData = building.equipment[floor] || building.equipment.default;
+    const names = [
+        ...(eqData.frontElevators || []),
+        ...(eqData.escalators || []),
+        ...(eqData.middleElevators || []),
+        ...(eqData.backElevators || [])
+    ];
+    equipmentSelect.replaceChildren();
+    names.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        equipmentSelect.appendChild(option);
     });
-    return [...names];
 }
 function openBuildingReportForm() {
     if (!currentBuilding) {
         alert("Please select a building first.");
         return;
     }
-    reportTarget = {
-        buildingID: currentBuilding,
-        floor: selectedFloor,
-        equipment: ""
-    };
+    const building = buildingData[currentBuilding];
     const modal = document.getElementById("report-modal");
     const buildingInput = document.getElementById("report-building");
-    const equipmentSelect = document.getElementById("report-equipment");
-    if (buildingInput) {
-        buildingInput.value = buildingData[currentBuilding].title;
-    }
-    if (equipmentSelect) {
-        equipmentSelect.replaceChildren();
-        getAllEquipmentForBuilding(currentBuilding).forEach((name) => {
-            const option = document.createElement("option");
-            option.value = name;
-            option.textContent = name;
-            equipmentSelect.appendChild(option);
-        });
-    }
+    const floorSelect = document.getElementById("report-floor");
     const reportForm = document.getElementById("report-form");
-    if (reportForm) {
-        reportForm.reset();
-    }
-    if (buildingInput) {
-        buildingInput.value = buildingData[currentBuilding].title;
-    }
     const reportMessage = document.getElementById("report-message");
-    if (reportMessage) {
+    if (reportForm)
+        reportForm.reset();
+    if (buildingInput)
+        buildingInput.value = building.title;
+    floorSelect.replaceChildren();
+    building.floors.forEach((f) => {
+        const option = document.createElement("option");
+        option.value = String(f);
+        option.textContent = String(f);
+        floorSelect.appendChild(option);
+    });
+    floorSelect.value = String(selectedFloor !== null && selectedFloor !== void 0 ? selectedFloor : building.floors[0]);
+    const floor = Number(floorSelect.value);
+    populateReportEquipment(currentBuilding, floor);
+    reportTarget = { buildingID: currentBuilding, floor: floor, equipment: "" };
+    if (reportMessage)
         reportMessage.textContent = "";
-    }
-    if (modal) {
+    if (modal)
         modal.style.display = "flex";
-    }
 }
 function closeReportForm() {
     const modal = document.getElementById("report-modal");
@@ -517,10 +522,21 @@ function refreshEquipmentCards(container) {
         }
     });
 }
-//Handle form submission. 
+const floorSelectElement = document.getElementById("report-floor");
+if (floorSelectElement) {
+    floorSelectElement.addEventListener("change", () => {
+        if (!reportTarget)
+            return;
+        reportTarget.floor = Number(floorSelectElement.value);
+        populateReportEquipment(reportTarget.buildingID, reportTarget.floor);
+    });
+}
+//Handle form submission.
 const reportFormElement = document.getElementById("report-form");
 if (reportFormElement) {
     reportFormElement.addEventListener("submit", (event) => {
+        var _a;
+        var _b;
         event.preventDefault();
         if (!reportTarget)
             return;
@@ -541,39 +557,29 @@ if (reportFormElement) {
             reportMessage.textContent = "Please enter a valid email address.";
             return;
         }
-        const key = getEquipmentKey(reportTarget.buildingID, reportTarget.floor, equipment);
-        const now = Date.now();
-        let reports = getReports();
-        // Keep only reports from the last 24 hours.
-        reports = reports.filter((report) => now - report.timestamp < 24 * 60 * 60 * 1000);
-        // Do not allow the same email to submit another report
-        // for the same equipment within five minutes.
-        const duplicate = reports.some((report) => report.key === key &&
-            report.email === email &&
-            now - report.timestamp < 5 * 60 * 1000);
-        if (duplicate) {
-            reportMessage.textContent = "You already submitted a report for this equipment recently.";
+        if (!equipment) {
+            reportMessage.textContent = "Please choose an elevator or escalator.";
             return;
         }
-        reports.push({
-            key,
-            email,
-            crowding,
-            working,
-            details,
-            timestamp: now
-        });
+        const key = getEquipmentKey(reportTarget.buildingID, reportTarget.floor, equipment);
+        const now = Date.now();
+        // Keep only reports from the last 24 hours, then add this one.
+        let reports = getReports().filter((report) => now - report.timestamp < 24 * 60 * 60 * 1000);
+        reports.push({ key, email, crowding, working, details, timestamp: now });
         saveReports(reports);
-        const matchingReports = reports.filter((report) => report.key === key &&
+        // Current public status, and when it was last confirmed.
+        const current = calculateEquipmentStatus(key);
+        const confirmedAt = (_b = (_a = getEquipmentStatus()[key]) === null || _a === void 0 ? void 0 : _a.confirmedAt) !== null && _b !== void 0 ? _b : 0;
+        // Only reports made AFTER the last confirmation count as votes.
+        const distinctEmails = new Set(reports
+            .filter((report) => report.key === key &&
             report.working === working &&
-            now - report.timestamp < 24 * 60 * 60 * 1000);
-        const distinctEmails = new Set(matchingReports.map((report) => report.email));
-        if (distinctEmails.size >= 2) {
+            report.timestamp > confirmedAt)
+            .map((report) => report.email));
+        // Only change the status if the report disagrees with the current one.
+        if (working !== current.working && distinctEmails.size >= 2) {
             const statuses = getEquipmentStatus();
-            statuses[key] = {
-                working: working,
-                confirmedAt: now
-            };
+            statuses[key] = { working: working, confirmedAt: now };
             saveEquipmentStatus(statuses);
             reportMessage.textContent =
                 working === "no"
@@ -586,9 +592,6 @@ if (reportFormElement) {
         if (currentBuilding && selectedFloor !== null) {
             selectFloor(selectedFloor);
         }
-        // Keep the success message visible briefly before closing.
-        const result = reportMessage.textContent;
-        reportMessage.textContent = result;
         const submitBtn = reportFormElement.querySelector(".report-submit");
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -620,6 +623,7 @@ function openDirectoryModal() {
         return;
     container.replaceChildren();
     let htmlContent = "";
+    const seen = new Set();
     //Gets info from buildingData
     Object.keys(buildingData).forEach((buildingID) => {
         const building = buildingData[buildingID];
@@ -635,6 +639,9 @@ function openDirectoryModal() {
             ];
             allEquipmentOnFloor.forEach((equipmentName) => {
                 const key = getEquipmentKey(buildingID, floorNum, equipmentName);
+                if (seen.has(key))
+                    return;
+                seen.add(key);
                 const status = calculateEquipmentStatus(key);
                 const workingText = status.working === "no" ? "Out of Service" : "In Service";
                 const workingColor = status.working === "no" ? "#991b1b" : "#16a34a";
@@ -648,7 +655,7 @@ function openDirectoryModal() {
                 htmlContent += `
                     <div class="directory-item-card">
                         <div class="directory-item-info">
-                            <span class="directory-building-title">${building.title} (Floor ${floorNum})</span>
+                            <span class="directory-building-title">${building.title}${isEscalator(equipmentName) ? ` (Floor ${floorNum})` : ""}</span>
                             <span class="directory-equipment-name"><strong>${equipmentName}</strong></span>
                         </div>
                         <div style="text-align: right; display: flex; flex-direction: column; gap: 4px;">

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>home</title>
+    <title>LAMB</title>
+    <link rel="icon" type="image/png" href="images/cursor.png">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/script.js" defer> </script>
 </head>
@@ -60,7 +61,7 @@
                 <button class="close-button" onclick="closeFeature()"></button>
                 <!--placeholder info?-->
                 <h2 id="feature-title">building name here</h2>
-                <p id="feature-description"> description here</p>
+                <div id="feature-description"> description here</div>
             </div>
         </div>
 
@@ -77,6 +78,9 @@
         <form id="report-form">
             <label for="report-building">Building Name</label>
             <input id="report-building" type="text" readonly>
+
+            <label for="report-floor">Floor</label>
+            <select id="report-floor" required></select>
 
             <label for="report-equipment">Elevator / Escalator</label>
             <select id="report-equipment" required></select>
@@ -113,7 +117,6 @@
     </div>
 </div>
 
-</div> 
 
     <!-- Directory Button -->
     <div class="directory-btn-container">
